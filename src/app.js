@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./utils/createPayment');
 const express = require("express");
 const connectDB = require("./config/database");
 const paymentRouter = require("./routes/payment");
@@ -7,10 +8,10 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 7771;
 
-await connectDB().then(()=>{
+connectDB().then(()=>{
     console.log("DB connected sucessfully")
 }).catch((err)=>{
-    console.log("DB connection fails"+ err.message)
+    console.log("DB connection fails"+err.message)
     process.exit(1);
 })
 app.use(cors({
@@ -19,7 +20,6 @@ app.use(cors({
 }))
 app.use(express.json());
 app.use("/",paymentRouter);
-
 app.listen(PORT,()=>{
     console.log(`server listening on port ${PORT}`);
 })
