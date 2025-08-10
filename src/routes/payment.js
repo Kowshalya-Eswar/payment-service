@@ -3,6 +3,44 @@ const paymentRouter = express.Router();
 const Payment = require("../models/Payment");
 const amqp = require("amqplib");
 const {validateWebhookSignature} = require('razorpay/dist/utils/razorpay-utils');
+const mongoose = require('mongoose');
+
+/**
+ * @route POST /api/payments
+ * @description Retrieves payment records.
+ * Can filter payments by `orderId`  using query parameters.
+ * @query orderId {string} - Optional. The MongoDB _id of the order to filter payments by.
+ */
+paymentRouter.post('/api/payments', async (req, res) => {
+    try {
+        const apiKey = req.get('x-api-key');
+         if (!apiKey || apiKey !== process.env.PAYMENT_SERVICE_TOKEN) {
+            res.status(401).json({
+                sucess: false,
+                error: 'Unauthorized' 
+            });
+        }
+        const {orderIds} = req.body;
+        let queryFilter = {};
+        if(orderIds) {
+            queryFilter.orderId = {$in:orderIds}
+        }
+        const payments = await Payment.find(queryFilter).select('-__v -_id');
+        let message = "Payments retrieved successfully";
+
+        res.status(200).json({
+            message: message,
+            success: true,
+            data: payments
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: 'failed to retrieve payments',
+            success: false,
+            data: err
+        });
+    }
+});
 /**
  * @route   POST /api/payment/hook
  * @desc    Razorpay Webhook Handler - Handles payment status updates from Razorpay
