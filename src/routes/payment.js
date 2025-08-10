@@ -22,7 +22,7 @@ paymentRouter.post('/api/payments', async (req, res) => {
         }
         const {orderIds} = req.body;
         let queryFilter = {};
-        if(orderIds) {
+        if(orderIds.length != 0) {
             queryFilter.orderId = {$in:orderIds}
         }
         const payments = await Payment.find(queryFilter).select('-__v -_id');
