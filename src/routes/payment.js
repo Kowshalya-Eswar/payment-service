@@ -15,7 +15,7 @@ paymentRouter.post('/api/payments', async (req, res) => {
     try {
         const apiKey = req.get('x-api-key');
          if (!apiKey || apiKey !== process.env.PAYMENT_SERVICE_TOKEN) {
-            res.status(401).json({
+            return res.status(401).json({
                 sucess: false,
                 error: 'Unauthorized' 
             });
