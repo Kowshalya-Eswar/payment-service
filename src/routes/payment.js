@@ -63,7 +63,7 @@ paymentRouter.post('/api/payment/hook', async(req,res)=>{
         payment.status = paymentDetails.status;
         await payment.save(); 
         console.log("payment saved");
-        const status = "pending";
+        let status = "pending";
        if (req.body.event == "payment.captured") {
             status = "captured";
         } else if (req.body.event == "payment.failed") {
