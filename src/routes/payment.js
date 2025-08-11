@@ -48,31 +48,27 @@ paymentRouter.post('/api/payments', async (req, res) => {
  **/
 paymentRouter.get('/api/payment/hook', async(req,res)=>{
      try {
-       /* const signature = req.get('X-Razorpay-Signature');
+        console.log("test");
+        const signature = req.get('X-Razorpay-Signature');
         const isWebhookValid = validateWebhookSignature(JSON.stringify(req.body), 
         signature,
         process.env.RAZORPAY_WEBHOOK_SECRET);
 
         if (!isWebhookValid) {
             return sendErrorResponse(res, 400, "webhook signature is invalid");
-        } */
-        //const paymentDetails = req.body.payload.payment.entity;
-        const paymentDetails = {
-            order_id: 'order_R3JSKZsz5rJVPv',
-            receipt: 'rec_ddf6ecc9-c61b-4606-ad8c-f774a376cee7',
-            amountPaid: '1000',
-            status: 'captured',
-            notes :{
-                firstName :'test',
-                lastName: 'test',
-                email: 'kowsi.ganeshan@gmail.com'
-            }
-        };
+        }
+        const paymentDetails = req.body.payload.payment.entity;
        
         const payment = await Payment.findOne({ orderId: paymentDetails.order_id});
         payment.status = paymentDetails.status;
         await payment.save(); 
-       
+        console.log("payment saved");
+        const status = "pending";
+       if (req.body.event == "payment.captured") {
+            status = "captured";
+        } else if (req.body.event == "payment.failed") {
+            status = "failed";
+        }
         //publish event to RabbitMQ for cocofields to consume
         const connection = await amqp.connect(process.env.RABBITMQ_URL);
         const channel = await connection.createChannel();
@@ -82,14 +78,14 @@ paymentRouter.get('/api/payment/hook', async(req,res)=>{
 
         const eventPayload = {
             paymentDetails: paymentDetails,
-            paymentStatus: payment.status,
+            paymentStatus: status,
         };
 
         channel.publish(exchange, '', Buffer.from(JSON.stringify(eventPayload)));
 
         await channel.close();
         await connection.close();
-
+        console.log("webhook handled");
         res.status(200).json({ msg: "Webhook handled and event published" });
 
     } catch (err) {
