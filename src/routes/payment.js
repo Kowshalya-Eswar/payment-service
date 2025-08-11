@@ -48,7 +48,6 @@ paymentRouter.post('/api/payments', async (req, res) => {
  **/
 paymentRouter.post('/api/payment/hook', async(req,res)=>{
      try {
-        console.log("test");
         const signature = req.get('X-Razorpay-Signature');
         const isWebhookValid = validateWebhookSignature(JSON.stringify(req.body), 
         signature,
@@ -62,7 +61,6 @@ paymentRouter.post('/api/payment/hook', async(req,res)=>{
         const payment = await Payment.findOne({ orderId: paymentDetails.order_id});
         payment.status = paymentDetails.status;
         await payment.save(); 
-        console.log("payment saved");
         let status = "pending";
        if (req.body.event == "payment.captured") {
             status = "captured";
@@ -85,7 +83,6 @@ paymentRouter.post('/api/payment/hook', async(req,res)=>{
 
         await channel.close();
         await connection.close();
-        console.log("webhook handled");
         res.status(200).json({ msg: "Webhook handled and event published" });
 
     } catch (err) {
