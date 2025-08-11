@@ -46,7 +46,7 @@ paymentRouter.post('/api/payments', async (req, res) => {
  * @desc    Razorpay Webhook Handler - Handles payment status updates from Razorpay
  * @access  Public (should be protected by signature verification) 
  **/
-paymentRouter.get('/api/payment/hook', async(req,res)=>{
+paymentRouter.post('/api/payment/hook', async(req,res)=>{
      try {
         console.log("test");
         const signature = req.get('X-Razorpay-Signature');
